@@ -56,21 +56,6 @@ class JwtAuthorizationFilterTest {
     }
 
     @Test
-    @DisplayName("Authorization 헤더가 없을 경우 필터 체인 진행 테스트")
-    void doFilterInternal_NoAuthHeader_ContinueFilterChain() throws ServletException, IOException {
-        // given
-        when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn(null);
-
-        // when
-        jwtAuthorizationFilter.doFilterInternal(request, response, filterChain);
-
-        // then
-        verify(filterChain).doFilter(request, response);
-        verify(jwtManager, never()).validateToken(any());
-        verify(userDetailsService, never()).extractAuthentication(any());
-    }
-
-    @Test
     @DisplayName("올바른 Bearer 토큰으로 인증 성공 테스트")
     void doFilterInternal_ValidToken_Success() throws ServletException, IOException {
         // given
@@ -95,6 +80,38 @@ class JwtAuthorizationFilterTest {
     }
 
     @Test
+    @DisplayName("Authorization 헤더가 없을 경우 필터 체인 진행 테스트")
+    void doFilterInternal_NoAuthHeader_ContinueFilterChain() throws ServletException, IOException {
+        // given
+        when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn(null);
+
+        // when
+        jwtAuthorizationFilter.doFilterInternal(request, response, filterChain);
+
+        // then
+        verify(filterChain).doFilter(request, response);
+        verify(jwtManager, never()).validateToken(any());
+        verify(userDetailsService, never()).extractAuthentication(any());
+    }
+
+    @Test
+    @DisplayName("Bearer 접두사가 없는 토큰 처리 테스트")
+    void doFilterInternal_NonBearerToken_ContinueFilterChain() throws ServletException, IOException {
+        // given
+        String token = "token";
+
+        when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn(token);
+
+        // when
+        jwtAuthorizationFilter.doFilterInternal(request, response, filterChain);
+
+        // then
+        verify(filterChain).doFilter(request, response);
+        verify(jwtManager, never()).validateToken(any());
+        verify(userDetailsService, never()).extractAuthentication(any());
+    }
+
+    @Test
     @DisplayName("잘못된 토큰으로 인증 실패 테스트")
     void doFilterInternal_InvalidToken_SetErrorResponse() throws ServletException, IOException {
         // given
@@ -115,23 +132,6 @@ class JwtAuthorizationFilterTest {
         verify(response).setStatus(ExceptionCase.INVALID_TOKEN.getHttpStatus().value());
         verify(response).setContentType(MediaType.APPLICATION_JSON_VALUE);
         verify(filterChain, never()).doFilter(request, response);
-    }
-
-    @Test
-    @DisplayName("Bearer 접두사가 없는 토큰 처리 테스트")
-    void doFilterInternal_NonBearerToken_ContinueFilterChain() throws ServletException, IOException {
-        // given
-        String token = "token";
-
-        when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn(token);
-
-        // when
-        jwtAuthorizationFilter.doFilterInternal(request, response, filterChain);
-
-        // then
-        verify(filterChain).doFilter(request, response);
-        verify(jwtManager, never()).validateToken(any());
-        verify(userDetailsService, never()).extractAuthentication(any());
     }
 
 }

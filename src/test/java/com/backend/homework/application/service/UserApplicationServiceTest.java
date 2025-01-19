@@ -18,6 +18,7 @@ import com.backend.homework.infrastructure.security.UserDetailsImpl;
 import com.backend.homework.infrastructure.security.UserDetailsServiceImpl;
 import com.backend.homework.presentation.request.LoginRequest;
 import com.backend.homework.presentation.request.SignUpRequest;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -123,6 +124,26 @@ class UserApplicationServiceTest {
                 .hasFieldOrPropertyWithValue("exceptionCase", ExceptionCase.PASSWORD_NOT_MATCH);
         verify(userDetailsService).loadUserByUsername(request.username());
         verify(passwordEncoder).matches(request.password(), user.getPassword());
+    }
+
+    @Test
+    @DisplayName("본인 정보 조회 성공 테스트")
+    void getMyInfo_Success() {
+        // given
+        String username = "username";
+        String password = "password";
+        String nickname = "nickname";
+        User user = User.create(username, password, nickname);
+        UserResponse userResponse = UserResponse.from(user);
+
+        when(userRepository.findByUsername(username)).thenReturn(Optional.of(user));
+
+        // when
+        UserResponse response = userApplicationService.getMyInfo(username);
+
+        // then
+        assertThat(response).isEqualTo(userResponse);
+        verify(userRepository).findByUsername(username);
     }
 
 }
