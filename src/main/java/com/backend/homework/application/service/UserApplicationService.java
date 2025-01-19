@@ -50,4 +50,10 @@ public class UserApplicationService {
         }
     }
 
+    public UserResponse getMyInfo(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ApplicationException(ExceptionCase.USER_NOT_FOUND));
+        return UserResponse.from(user);
+    }
+
 }
