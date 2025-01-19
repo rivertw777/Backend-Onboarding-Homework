@@ -1,4 +1,4 @@
-package com.backend.homework.domain.service;
+package com.backend.homework.infrastructure.security;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
@@ -18,53 +18,48 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class UserDomainServiceTest {
+class UserDetailsServiceImplTest {
 
     @Mock
     private UserRepository userRepository;
 
     @InjectMocks
-    private UserDomainService userDomainService;
+    private UserDetailsServiceImpl userDetailsService;
 
     @Test
-    @DisplayName("사용자 생성 성공 테스트")
-    void createUser_Success() {
+    @DisplayName("사용자명으로 UserDetails 조회 성공 테스트")
+    void loadUserByUsername_Success() {
         // given
         String username = "username";
         String password = "password";
         String nickname = "nickname";
 
-        when(userRepository.findByUsername(username)).thenReturn(Optional.empty());
+        User user = User.create(username, password, nickname);
+
+        when(userRepository.findByUsername(username)).thenReturn(Optional.of(user));
 
         // when
-        User createdUser = userDomainService.createUser(username, password, nickname);
+        UserDetailsImpl userDetails = userDetailsService.loadUserByUsername(username);
 
         // then
-        assertThat(createdUser).isNotNull();
-        assertThat(createdUser.getUsername()).isEqualTo(username);
-        assertThat(createdUser.getPassword()).isEqualTo(password);
-        assertThat(createdUser.getNickname()).isEqualTo(nickname);
+        assertThat(userDetails).isNotNull();
+        assertThat(userDetails.getUsername()).isEqualTo(username);
+        assertThat(userDetails.getPassword()).isEqualTo(password);
         verify(userRepository).findByUsername(username);
     }
 
     @Test
-    @DisplayName("중복된 사용자명으로 생성 시 예외 발생")
-    void createUser_WithDuplicateUsername_ThrowsException() {
+    @DisplayName("존재하지 않는 사용자명으로 조회 시 예외 발생 테스트")
+    void loadUserByUsername_UserNotFound_ThrowsException() {
         // given
         String username = "username";
-        String password = "password";
-        String nickname = "nickname";
 
-        User existingUser = User.create(username, password, nickname);
-
-        when(userRepository.findByUsername(username))
-                .thenReturn(Optional.of(existingUser));
+        when(userRepository.findByUsername(username)).thenReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() ->
-                userDomainService.createUser(username, password, nickname))
+        assertThatThrownBy(() -> userDetailsService.loadUserByUsername(username))
                 .isInstanceOf(ApplicationException.class)
-                .hasFieldOrPropertyWithValue("exceptionCase", ExceptionCase.USERNAME_ALREADY_TAKEN);
+                .hasFieldOrPropertyWithValue("exceptionCase", ExceptionCase.USER_NOT_FOUND);
         verify(userRepository).findByUsername(username);
     }
 

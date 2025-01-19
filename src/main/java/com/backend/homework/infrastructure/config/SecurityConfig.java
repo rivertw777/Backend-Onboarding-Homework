@@ -24,7 +24,8 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .sessionManagement(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers(antMatcher(HttpMethod.POST, "/api/users")).permitAll()
+                        .requestMatchers(antMatcher(HttpMethod.POST, "/api/users/signup")).permitAll()
+                        .requestMatchers(antMatcher(HttpMethod.POST, "/api/users/sign")).permitAll()
                         .requestMatchers("/swagger-ui/**", "/swagger-resources/**", "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated()
                 );
