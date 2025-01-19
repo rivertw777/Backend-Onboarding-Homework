@@ -54,7 +54,6 @@ class UserDomainServiceTest {
         String username = "username";
         String password = "password";
         String nickname = "nickname";
-
         User existingUser = User.create(username, password, nickname);
 
         when(userRepository.findByUsername(username))

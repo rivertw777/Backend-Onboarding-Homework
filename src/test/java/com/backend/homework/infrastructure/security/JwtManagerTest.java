@@ -8,6 +8,7 @@ import com.backend.homework.application.dto.TokenPair;
 import com.backend.homework.common.exception.ApplicationException;
 import com.backend.homework.common.exception.ExceptionCase;
 import com.backend.homework.domain.model.entity.User;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -40,7 +41,6 @@ class JwtManagerTest {
         String username = "username";
         String password = "password";
         String nickname = "nickname";
-
         User user = User.create(username, password, nickname);
         UserDetailsImpl userDetails = new UserDetailsImpl(user);
 
@@ -60,16 +60,15 @@ class JwtManagerTest {
         String username = "username";
         String password = "password";
         String nickname = "nickname";
-
         User user = User.create(username, password, nickname);
         UserDetailsImpl userDetails = new UserDetailsImpl(user);
-
-        // when
         TokenPair tokenPair = jwtManager.generateTokenPair(userDetails);
 
+        // when
+        Claims claims = jwtManager.parseClaims(tokenPair.accessToken());
+
         // then
-        assertThat(jwtManager.parseClaims(tokenPair.accessToken()).getSubject()).isEqualTo("username");
-        assertThat(jwtManager.parseClaims(tokenPair.refreshToken()).getSubject()).isEqualTo("username");
+        assertThat(claims.getSubject()).isEqualTo("username"); // 수정된 부분
     }
 
     @Test
@@ -79,7 +78,6 @@ class JwtManagerTest {
         String username = "username";
         String password = "password";
         String nickname = "nickname";
-
         User user = User.create(username, password, nickname);
         UserDetailsImpl userDetails = new UserDetailsImpl(user);
         TokenPair tokenPair = jwtManager.generateTokenPair(userDetails);

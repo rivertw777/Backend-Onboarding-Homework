@@ -55,7 +55,6 @@ class UserApplicationServiceTest {
         String password = "password";
         String nickname = "nickname";
         String encodedPassword = "encodedPassword";
-
         SignUpRequest request = new SignUpRequest(username, password, nickname);
         User user = User.create(request.username(), encodedPassword, request.nickname());
         UserResponse userResponse = UserResponse.from(user);
@@ -68,9 +67,9 @@ class UserApplicationServiceTest {
 
         // then
         assertThat(response).isEqualTo(userResponse);
-        verify(userRepository).save(user);
         verify(passwordEncoder).encode(request.password());
         verify(userDomainService).createUser(request.username(), encodedPassword, request.nickname());
+        verify(userRepository).save(user);
     }
 
     @Test
@@ -83,7 +82,6 @@ class UserApplicationServiceTest {
         String encodedPassword = "encodedPassword";
         String accessToken = "accessToken";
         String refreshToken = "refreshToken";
-
         LoginRequest request = new LoginRequest(username, password);
         User user = User.create(username, encodedPassword, nickname);
         UserDetailsImpl userDetails = new UserDetailsImpl(user);
@@ -111,7 +109,6 @@ class UserApplicationServiceTest {
         String password = "password";
         String nickname = "nickname";
         String encodedPassword = "encodedPassword";
-
         LoginRequest request = new LoginRequest(username, password);
         User user = User.create(username, encodedPassword, nickname);
         UserDetailsImpl userDetails = new UserDetailsImpl(user);
